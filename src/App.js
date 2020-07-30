@@ -14,33 +14,42 @@ function App() {
   }, [])
 
   async function handleRemoveRepository(id) {
-    api.delete(`/repositories/${id}`)
+    const response = await api.delete(`/repositories/${id}`)
+    const repositoriesAux = repositories
+    
+    console.log(response)
+    
+    if (response.status === 204) {
+      const repositoryIndex = repositories.findIndex(repository => repository.id === id);
+      
+      repositoriesAux.splice(repositoryIndex, 1)
 
-    window.location.reload()
+      setRepositories([ ...repositoriesAux ])
+    }
   }
 
   async function handleAddRepository() {
-    api.post(`/repositories`, {
+    const response = await api.post(`/repositories`, {
       title: 'Projeto desafio react',
       url: 'https://github.com/erick-iwamoto/desafio-reactjs',
       techs: ['Reactjs']
     })
 
-    window.location.reload()
+    const repository = response.data
+
+    setRepositories([...repositories, repository])    
   }
 
   return (
     <div>
       <ul data-testid="repository-list">
-        {repositories.length > 0 && repositories.map(repository => {
+        {repositories.map(repository => {
           return (
             <li key={repository.id}>
-              <div>
-                <Repository data={repository} />
-                <button onClick={() => handleRemoveRepository(repository.id)}>
-                  Remover
-                </button>
-              </div>
+              {repository.title}
+              <button onClick={() => handleRemoveRepository(repository.id)}>
+                Remover
+              </button>
             </li>
           )
         })}
